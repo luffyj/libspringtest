@@ -3,8 +3,13 @@ package org.luffy.lib.libspringtest;
 import org.luffy.lib.libspring.config.JpaConfig;
 import org.luffy.lib.libspring.config.RuntimeConfig;
 import org.luffy.lib.libspring.config.SecurityConfig;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
+import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.support.AbstractGenericContextLoader;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +24,7 @@ import java.util.Arrays;
  * </pre>
  * @author luffy luffy.ja at gmail.com
  */
-public abstract class SpringContextLoader extends AnnotationConfigContextLoader {
+public abstract class SpringContextLoader extends AbstractGenericContextLoader {
 
     protected abstract Class<? extends SecurityConfig> securityConfig();
 
@@ -28,8 +33,37 @@ public abstract class SpringContextLoader extends AnnotationConfigContextLoader 
     protected abstract Class<?>[] getCoreRootConfigClasses();
 
     @Override
+    protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
+        Class<?>[] annotatedClasses = mergedConfig.getClasses();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Registering annotated classes: " + ObjectUtils.nullSafeToString(annotatedClasses));
+        }
+        new AnnotatedBeanDefinitionReader(context).register(annotatedClasses);
+    }
+
+    @Override
+    protected BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
+        throw new UnsupportedOperationException(
+                "AnnotationConfigContextLoader does not support the createBeanDefinitionReader(GenericApplicationContext) method");
+    }
+
+    @Override
+    protected String getResourceSuffix() {
+        throw new UnsupportedOperationException(
+                "AnnotationConfigContextLoader does not support the getResourceSuffix() method");
+    }
+
+    @Override
+    public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
+        if (!configAttributes.hasClasses() && isGenerateDefaultLocations()) {
+            configAttributes.setClasses(detectDefaultConfigurationClasses(configAttributes.getDeclaringClass()));
+        }
+    }
+
+    //    @Override
     protected Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {
-        ArrayList<Class<?>> list = new ArrayList(Arrays.asList(super.detectDefaultConfigurationClasses(declaringClass)));
+//        ArrayList<Class<?>> list = new ArrayList(Arrays.asList(super.detectDefaultConfigurationClasses(declaringClass)));
+        ArrayList<Class<?>> list  = new ArrayList<>();
 
         list.add(securityConfig());
         list.add(runtimeConfig());
