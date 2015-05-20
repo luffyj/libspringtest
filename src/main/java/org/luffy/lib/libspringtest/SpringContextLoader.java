@@ -1,9 +1,9 @@
 package org.luffy.lib.libspringtest;
 
-import org.luffy.lib.libspring.config.JpaConfig;
-import org.luffy.lib.libspring.config.MVCConfig;
+import org.luffy.lib.libspring.config.LibJpaConfig;
+import org.luffy.lib.libspring.config.LibMVCConfig;
+import org.luffy.lib.libspring.config.LibSecurityConfig;
 import org.luffy.lib.libspring.config.RuntimeConfig;
-import org.luffy.lib.libspring.config.SecurityConfig;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
@@ -32,7 +32,7 @@ public abstract class SpringContextLoader extends AbstractGenericContextLoader {
      * **/
     protected abstract boolean loadDefaultMVC();
 
-    protected abstract Class<? extends SecurityConfig> securityConfig();
+    protected abstract Class<? extends LibSecurityConfig> securityConfig();
 
     protected abstract Class<? extends RuntimeConfig> runtimeConfig();
 
@@ -71,13 +71,13 @@ public abstract class SpringContextLoader extends AbstractGenericContextLoader {
 //        ArrayList<Class<?>> list = new ArrayList(Arrays.asList(super.detectDefaultConfigurationClasses(declaringClass)));
         ArrayList<Class<?>> list  = new ArrayList(Arrays.asList(getCoreRootConfigClasses()));
 
-        list.add(JpaConfig.class);
+        list.add(LibJpaConfig.class);
         list.add(runtimeConfig());
         Class securityClass = securityConfig();
         if (securityClass!=null)
             list.add(securityClass);
         if (loadDefaultMVC()){
-            list.add(MVCConfig.class);
+            list.add(LibMVCConfig.class);
         }
 
 
