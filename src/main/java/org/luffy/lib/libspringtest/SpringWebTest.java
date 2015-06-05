@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  *     实际上发现这样Load好像不太靠谱 老老实实一个一个Load吧……
  *     <code>@</code>RunWith(SpringJUnit4ClassRunner.class)
  * </pre>
+ * <p>1.3 fixed bug</p>
  * @see SpringContextLoader
  * @see org.springframework.test.context.ContextConfiguration
  * @author luffy luffy.ja at gmail.com
@@ -72,9 +73,13 @@ public class SpringWebTest {
     @Before
     public void creatMockMVC() {
         MockitoAnnotations.initMocks(this);
-        mockMvc = webAppContextSetup(context)
+        if(springSecurityFilter!=null)
+            mockMvc = webAppContextSetup(context)
                 .addFilters(springSecurityFilter)
                 .build();
+        else
+            mockMvc = webAppContextSetup(context)
+                    .build();
     }
 
     /**
